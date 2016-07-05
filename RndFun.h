@@ -12,5 +12,7 @@ Sarray Theta(Sarray A);
 Sarray Rho(Sarray A);
 Sarray Pi(Sarray A);
 Sarray Chi(Sarray A);
+bool rc(int t);
+Sarray Iota(Sarray A, int RIndex);
 
 #endif // ROUNDFUN_H

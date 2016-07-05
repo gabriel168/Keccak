@@ -3,8 +3,7 @@
 #include <vector>
 #include"RndFun.h"
 using namespace std;
-unsigned int rate = 3;
-
+unsigned int rate = 5;
 
 int main(int argc, char *argv[]){
 //Datei->bit-Vektor
