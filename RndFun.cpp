@@ -91,3 +91,23 @@ Sarray Iota(Sarray A,int RIndex){
     return A;
 }
 
+Sarray RPerm(Sarray A, int RIndex){
+    A = Iota(Chi(Pi(Rho(Theta(A)))),RIndex);
+    return A;
+}
+
+Sarray Absorb(vector<bool> M, Sarray A){
+    for(int i = 0; i < rate; i++){
+        A[(320/i)%5][(1600/i)%5][i%64]=A[(320/i)%5][(1600/i)%5][i%64]^M[i];
+    }
+    return A;
+}
+
+vector<bool> Squeeze(vector<bool> M, Sarray A){
+    for(int i = 0; i < rate; i++){
+        M.push_back(A[(320/i)%5][(1600/i)%5][i%64]);
+    }
+    return M;
+}
+
+
