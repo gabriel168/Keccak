@@ -2,7 +2,7 @@
 #define ROUNDFUN_H
 #include<vector>
 using namespace std;
-extern unsigned int rate;
+extern int rate;
 
 typedef vector<bool> lane;
 typedef vector<lane> sheet;
@@ -14,5 +14,9 @@ Sarray Pi(Sarray A);
 Sarray Chi(Sarray A);
 bool rc(int t);
 Sarray Iota(Sarray A, int RIndex);
+Sarray RPerm(Sarray A, int RIndex);
+
+Sarray Absorb(vector<bool> M, Sarray A);
+vector<bool> Squeeze(vector<bool> M, Sarray A);
 
 #endif // ROUNDFUN_H
