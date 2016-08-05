@@ -5,7 +5,7 @@
 #include<cmath>
 
 using namespace std;
-int rate = 576;
+int BitRate = 576;
 
 int main(int argc, char *argv[]){
 
@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
 
 //pad10*1-
     input.push_back(1);
-    while((input.size()+1)%rate>0){
+    while((input.size()+1)%BitRate>0){
         input.push_back(0);}
     input.push_back(1);
 
@@ -40,13 +40,21 @@ int main(int argc, char *argv[]){
             }
         }
 
+//Sponge
+for(int NR=0; NR<(input.size()/BitRate); NR++){
+    state=Absorb(input, state, NR*BitRate);
+    state = RPerm(state);
+}
+vector<bool> Hash(512);
+for(int l=0; l< 512; l++){
+    Hash[l]=Squeeze(state, l);
+}
 
-cout << "\n" << testding << "\n";
 
-
-//Bit-Output
-for(unsigned long t=0; t<input.size();t++){cout << input[t]; }
-
+//Hash-Output
+for(unsigned long t=0; t<Hash.size();t++){cout << Hash[t]; }
 cout << endl;
+//State-Output
+
     return 0;
 }

@@ -36,20 +36,36 @@ Sarray Theta(Sarray A){
 
 Sarray Rho(Sarray A){
     Sarray B(5,sheet(5,lane(64)));
-    for(int z = 0; z++; z<64){
-        B[0][0][z] = A[0][0][z];
-    }
-    unsigned int x=1,y=0;
-    for(unsigned int t=0;t<24;t++){
-        for(int z = 0; z++; z<64){
-            B[x][y][z] = A[x][y][(z-(t+1)*(t+2)/2)%64];
-        }
-        int xtmp = x;
-        x = y;
-        y = (2*xtmp+3*y)%5;
+    for(int z=0;z<64;z++){
+    B[0][0][z]=A[0][0][z];
+    B[1][0][z] = A[1][0][(z+63)%64];
+    B[0][2][z] = A[0][2][(z+61)%64];
+    B[2][1][z] = A[2][1][(z+58)%64];
+    B[1][2][z] = A[1][2][(z+54)%64];
+    B[2][3][z] = A[2][3][(z+49)%64];
+    B[3][3][z] = A[3][3][(z+43)%64];
+    B[3][0][z] = A[3][0][(z+36)%64];
+    B[0][1][z] = A[0][1][(z+28)%64];
+    B[1][3][z] = A[1][3][(z+19)%64];
+    B[3][1][z] = A[3][1][(z+9)%64];
+    B[1][4][z] = A[1][4][(z+62)%64];
+    B[4][4][z] = A[4][4][(z+50)%64];
+    B[4][0][z] = A[4][0][(z+37)%64];
+    B[0][3][z] = A[0][3][(z+23)%64];
+    B[3][4][z] = A[3][4][(z+8)%64];
+    B[4][3][z] = A[4][3][(z+56)%64];
+    B[3][2][z] = A[3][2][(z+39)%64];
+    B[2][2][z] = A[2][2][(z+21)%64];
+    B[2][0][z] = A[2][0][(z+2)%64];
+    B[0][4][z] = A[0][4][(z+46)%64];
+    B[4][2][z] = A[4][2][(z+25)%64];
+    B[2][4][z] = A[2][4][(z+3)%64];
+    B[4][1][z] = A[4][1][(z+44)%64];
+    B[1][1][z] = A[1][1][(z+20)%64];
     }
     return B;
 }
+
 
 Sarray Pi(Sarray A){
     Sarray B(5,sheet(5,lane(64)));
@@ -96,14 +112,16 @@ Sarray Iota(Sarray A,int RIndex){
     return A;
 }
 
-Sarray RPerm(Sarray A, int RIndex){
-    A = Iota(Chi(Pi(Rho(Theta(A)))),RIndex);
+Sarray RPerm(Sarray A){
+    for(int RIndex = 0; RIndex < 24; RIndex++){
+        A = Iota(Chi(Pi(Rho(Theta(A)))),RIndex);
+    }
     return A;
 }
 
 Sarray Absorb(vector<bool> M, Sarray A, int Pos){
-    for(int n = 0; n < M.size(); n++){
-        A[(n/64)%5][(n/320)%5][n%64]=A[(n/64)%5][(n/320)%5][n%64]^M[n];
+    for(int n = 0; n < BitRate; n++){
+        A[(n/64)%5][(n/320)%5][n%64]=A[(n/64)%5][(n/320)%5][n%64]^M[n+Pos];
     }
     return A;
 }
