@@ -7,8 +7,8 @@ using namespace std;
 
 
 Sarray Theta(Sarray A){
+
     vector< vector<bool> > C(5, vector<bool>(64));
-    vector< vector<bool> > D(5, vector<bool>(64));
 
     for(int x=0;x<5;x++){
         for(int z=0;z<64;z++){
@@ -16,9 +16,11 @@ Sarray Theta(Sarray A){
         }
     }
 
+    vector< vector<bool> > D(5, vector<bool>(64));
+
     for(int x=0;x<5;x++){
         for(int z=0;z<64;z++){
-            D[x][z] = C[(x-1)%5][z]^C[(x+1)%5][(z-1)%64];
+            D[x][z] = C[(x+4)%5][z]^C[(x+1)%5][(z+63)%64];
         }
     }
 
@@ -31,6 +33,7 @@ Sarray Theta(Sarray A){
     }
     return A;
 }
+
 Sarray Rho(Sarray A){
     Sarray B(5,sheet(5,lane(64)));
     for(int z = 0; z++; z<64){
@@ -39,11 +42,11 @@ Sarray Rho(Sarray A){
     unsigned int x=1,y=0;
     for(unsigned int t=0;t<24;t++){
         for(int z = 0; z++; z<64){
-            B[0][0][z] = A[0][0][(z-(t+1)*(t+2)/2)%64];
+            B[x][y][z] = A[x][y][(z-(t+1)*(t+2)/2)%64];
+        }
         int xtmp = x;
         x = y;
         y = (2*xtmp+3*y)%5;
-        }
     }
     return B;
 }
@@ -65,15 +68,16 @@ Sarray Chi(Sarray A){
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
             for(int z=0;z<64;z++){
-                   B[x][y][z] = A[x][y][z]^((A[(x+1)%5 ][y][z]^1)&(A[(x+1)%5 ][y][z]));
+                   B[x][y][z] = A[x][y][z]^((A[(x+1)%5][y][z]^1)&(A[(x+1)%5][y][z]));
             }
         }
     }
+    return B;
 }
 
 bool rc(int t){
     vector<bool> R(8); R={0,0,0,0,0,0,0,1};
-    for(int i = 1; i < (t%255);i++){
+    for(int i = 0; i < (t%255);i++){
         R.push_back(0);
         R[8]=R[8]^R[0];
         R[4]=R[4]^R[0];
@@ -83,6 +87,7 @@ bool rc(int t){
     }
     return R[7];
 }
+
 
 Sarray Iota(Sarray A,int RIndex){
     vector<bool> RC (64); for(int a = 0; a < 64; a++){ RC[a]=0;}
@@ -96,18 +101,15 @@ Sarray RPerm(Sarray A, int RIndex){
     return A;
 }
 
-Sarray Absorb(vector<bool> M, Sarray A){
-    for(int i = 0; i < rate; i++){
-        A[(320/i)%5][(1600/i)%5][i%64]=A[(320/i)%5][(1600/i)%5][i%64]^M[i];
+Sarray Absorb(vector<bool> M, Sarray A, int Pos){
+    for(int n = 0; n < M.size(); n++){
+        A[(n/64)%5][(n/320)%5][n%64]=A[(n/64)%5][(n/320)%5][n%64]^M[n];
     }
     return A;
 }
 
-vector<bool> Squeeze(vector<bool> M, Sarray A){
-    for(int i = 0; i < rate; i++){
-        M.push_back(A[(320/i)%5][(1600/i)%5][i%64]);
-    }
-    return M;
+bool Squeeze(Sarray A, int Pos){
+    return (A[(Pos/64)%5][(Pos/320)%5][Pos%64]);
 }
 
 

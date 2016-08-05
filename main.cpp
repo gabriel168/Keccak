@@ -2,9 +2,10 @@
 #include <fstream>
 #include <vector>
 #include"RndFun.h"
+#include<cmath>
 
 using namespace std;
-int rate = 345;
+int rate = 576;
 
 int main(int argc, char *argv[]){
 
@@ -40,8 +41,12 @@ int main(int argc, char *argv[]){
         }
 
 
+cout << "\n" << testding << "\n";
+
+
 //Bit-Output
 for(unsigned long t=0; t<input.size();t++){cout << input[t]; }
+
 cout << endl;
     return 0;
 }
