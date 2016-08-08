@@ -2,7 +2,6 @@
 #include <fstream>
 #include <vector>
 #include"RndFun.h"
-#include<cmath>
 
 using namespace std;
 int BitRate = 576;
@@ -26,7 +25,7 @@ int main(int argc, char *argv[]){
 
 //pad10*1-
     input.push_back(1);
-    while((input.size()+1)%BitRate>0){
+    while((input.size()+1)%(BitRate)>0){
         input.push_back(0);}
     input.push_back(1);
 
@@ -45,10 +44,12 @@ for(int NR=0; NR<(input.size()/BitRate); NR++){
     state=Absorb(input, state, NR*BitRate);
     state = RPerm(state);
 }
+
 vector<bool> Hash(512);
 for(int l=0; l< 512; l++){
     Hash[l]=Squeeze(state, l);
 }
+
 
 
 //Hash-Output

@@ -3,6 +3,7 @@
 #include <iostream>
 #include<fstream>
 #include<cmath>
+#include<deque>
 using namespace std;
 
 
@@ -84,7 +85,7 @@ Sarray Chi(Sarray A){
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
             for(int z=0;z<64;z++){
-                   B[x][y][z] = A[x][y][z]^((A[(x+1)%5][y][z]^1)&(A[(x+1)%5][y][z]));
+                   B[x][y][z] = A[x][y][z]^((A[(x+1)%5][y][z]^1)&(A[(x+2)%5][y][z]));
             }
         }
     }
@@ -92,23 +93,28 @@ Sarray Chi(Sarray A){
 }
 
 bool rc(int t){
-    vector<bool> R(8); R={0,0,0,0,0,0,0,1};
+    deque<bool> R(8); R={1,0,0,0,0,0,0,0};
     for(int i = 0; i < (t%255);i++){
-        R.push_back(0);
-        R[8]=R[8]^R[0];
-        R[4]=R[4]^R[0];
-        R[3]=R[3]^R[0];
-        R[2]=R[2]^R[0];
-        R.erase(R.begin());
+        R.push_front(0);
+        R[0]=R[0]^R[8];
+        R[4]=R[4]^R[8];
+        R[5]=R[5]^R[8];
+        R[6]=R[6]^R[8];
+        R.pop_back();
     }
     return R[7];
 }
 
-
 Sarray Iota(Sarray A,int RIndex){
-    vector<bool> RC (64); for(int a = 0; a < 64; a++){ RC[a]=0;}
-    for(int j=0; j<=6; j++){RC[pow(2,j)-1]=rc(j+7*RIndex);}
-    for(int z=0; z<64 ;z++){A[0][0][z]=A[0][0][z]^RC[z];}
+    vector<bool> RC (64);
+    for(int a = 0; a < 64; a++){
+        RC[a]=0;
+    }
+    for(int j=0; j<=6; j++){
+        RC[(j << 1)-1]=rc(j+7*RIndex);
+    }
+    for(int z=0; z<64 ;z++){
+        A[0][0][z]=A[0][0][z]^RC[z];}
     return A;
 }
 
