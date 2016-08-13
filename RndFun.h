@@ -20,5 +20,6 @@ Sarray RPerm(Sarray A);
 Sarray Absorb(vector<bool> M, Sarray A, int Pos);
 bool Squeeze(Sarray A, int Pos);
 
+void PrintSarrBytes(Sarray A);
 
 #endif // ROUNDFUN_H
