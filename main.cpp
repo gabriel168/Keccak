@@ -28,9 +28,15 @@ int main(int argc, char *argv[]){
         Sinput.push_back(x);
         sha3.add(xPtr, 1);
         for(int i=0; i<=7;++i){
-            input.push_back((x >> (7-i)) & 1);
+            input.push_back((x >> (i)) & 1);
         }
-     }
+    }
+
+//InputOutput
+    cout << "Input:";
+    for(int n = 0; n<input.size(); n++){
+        cout << input[n];
+    }
 
 //01-Suffix
     input.push_back(0);
@@ -81,12 +87,9 @@ for(int NR=0; NR<(input.size()/BitRate); NR++){
         cout << "\n";
     }
 
-//TestHash
-    cout << "INPUT:  ";
 
-    cout << endl;
 //Hash-Output
-    int Hexadec = 0;
+    int Hexadec;
     cout << "Hash:    ";
     for(int t=0; t<Hash.size()/8;t++){
         Hexadec = 8*Hash[8*t+7]+4*Hash[8*t+6]+2*Hash[8*t+5]+Hash[8*t+4];
@@ -103,8 +106,6 @@ for(int NR=0; NR<(input.size()/BitRate); NR++){
     string TestHash = sha3.getHash();
     cout << TestHash << endl;
     SHA3 sha32;
-    sha32.reset();
-    string STestHash = sha32(Sinput);
-    cout << "STestHash" << STestHash << endl;
+
     return 0;
 }
