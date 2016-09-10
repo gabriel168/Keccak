@@ -1,8 +1,5 @@
 #include"RndFun.h"
-
-
 #include<cmath>
-using namespace std;
 
 /*Ersetzt jedes Element mit Koordinaten (a,b,c) durch den XOr-Wert von sich selbst und der
  * XOr-Summe aller Elemente mit den (x,z)-Koordinaten (a - 1,c) oder (a + 1,c - 1) */
