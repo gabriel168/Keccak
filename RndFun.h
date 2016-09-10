@@ -14,7 +14,7 @@ Sarray Rho(Sarray A);
 Sarray Pi(Sarray A);
 Sarray Chi(Sarray A);
 bool rc(int t);
-Sarray Iota(Sarray A, int RIndex);
+Sarray Iota(Sarray A, int index);
 Sarray RPerm(Sarray A);
 
 Sarray Absorb(vector<bool> M, Sarray A, int Pos);

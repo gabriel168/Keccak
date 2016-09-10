@@ -1,40 +1,36 @@
 #include"RndFun.h"
-#include<vector>
-#include <iostream>
-#include<fstream>
-#include<deque>
+
+
 #include<cmath>
 using namespace std;
 
-
-Sarray Theta(Sarray A){
-
-    vector< vector<bool> > C(5, vector<bool>(64));
-
+/*Ersetzt jedes Element mit Koordinaten (a,b,c) durch den XOr-Wert von sich selbst und der
+ * XOr-Summe aller Elemente mit den (x,z)-Koordinaten (a - 1,c) oder (a + 1,c - 1) */
+ Sarray Theta(Sarray A){
+    vector< vector<bool> > TmpArr1(5, vector<bool>(64));
     for(int x=0;x<5;x++){
         for(int z=0;z<64;z++){
-            C[x][z] = A[x][0][z]^A[x][1][z]^A[x][2][z]^A[x][3][z]^A[x][4][z];
+            TmpArr1[x][z] = A[x][0][z]^A[x][1][z]^A[x][2][z]^A[x][3][z]^A[x][4][z];
         }
     }
 
-    vector< vector<bool> > D(5, vector<bool>(64));
-
+    vector< vector<bool> > TempArr2(5, vector<bool>(64));
     for(int x=0;x<5;x++){
         for(int z=0;z<64;z++){
-            D[x][z] = C[(x+4)%5][z]^C[(x+1)%5][(z+63)%64];
+            TempArr2[x][z] = TmpArr1[(x+4)%5][z]^TmpArr1[(x+1)%5][(z+63)%64];
         }
     }
 
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
             for(int z=0;z<64;z++){
-                A[x][y][z]=A[x][y][z]^D[x][z];
+                A[x][y][z]=A[x][y][z]^TempArr2[x][z];
             }
         }
     }
     return A;
 }
-
+/*Verschiebt alle Elemente in der z-Richtung um einen Wert, der von den (x,y)-Koordinaten abhängt.*/
 Sarray Rho(Sarray A){
     Sarray B(5,sheet(5,lane(64)));
     for(int z=0;z<64;z++){
@@ -67,7 +63,8 @@ Sarray Rho(Sarray A){
     return B;
 }
 
-
+/*Ersetzt jede z-Reihe (bzw Lane) mit den (x,y)-Koordinaten (a,b)
+ * durch die Reihe mit (x,y)-Koordinaten (a + 3b,a)*/
 Sarray Pi(Sarray A){
     Sarray B(5,sheet(5,lane(64)));
     for(int x=0;x<5;x++){
@@ -80,57 +77,56 @@ Sarray Pi(Sarray A){
     return B;
 }
 
+/*Ersetzt jedes Element durch den XOr-Wert von sich selbst und einer Funktion aus zwei anderen Elementen*/
 Sarray Chi(Sarray A){
     Sarray B(5,sheet(5,lane(64)));
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
             for(int z=0;z<64;z++){
-                   B[x][y][z] = A[x][y][z]^((A[(x+1)%5][y][z]^1)&(A[(x+2)%5][y][z]));
+                   B[x][y][z] = A[x][y][z] ^ (!A[(x+1)%5][y][z] & (A[(x+2)%5][y][z]));
             }
         }
     }
     return B;
 }
 
+//Gibt abhängig von t entweder 0 oder 1 zurück
 bool rc(int t){
     if(t%255 == 0){return 1;}
-    deque<bool> R(8); R={1,0,0,0,0,0,0,0};
-    for(int i = 1; i <= (t%255);i++){
-        R.push_front(0);
-        R[0]=R[0]^R[8];
-        R[4]=R[4]^R[8];
-        R[5]=R[5]^R[8];
-        R[6]=R[6]^R[8];
-        R.pop_back();
+    short int R = 1;
+    for(int i = 0; i < t%255; i++){
+        R = R << 1;
+        R = R^((R >> 8) & 1);
+        R = R^((R >> 4) & 16);
+        R = R^((R >> 3) & 32);
+        R = R^((R >> 2) & 64);
     }
-    return R[0];
+    return R&1;
 }
 
-Sarray Iota(Sarray A,int RIndex){
+/*Modifiziert einige der Elemente der Reihe (0,0,z), deren z-Koordinate eine Zweierpotenz ist.*/
+Sarray Iota(Sarray A,int index){
     vector<bool> RC (64);
     for(int a = 0; a < 64; a++){
         RC[a]=0;
     }
     for(int j=0; j<=6; j++){
-        RC[pow(2,j)-1]=rc(j+(7*RIndex));
+        RC[pow(2,j)-1]=rc(j+(7*index));
     }
     for(int z=0; z<64 ;z++){
         A[0][0][z]=A[0][0][z]^RC[z];}
     return A;
 }
 
+//Alle Permutationsfunktionen einer Runde zusammen
 Sarray RPerm(Sarray A){
     for(int RIndex = 0; RIndex < 24; RIndex++){
-        cout << ">>RUNDE" << dec << RIndex << "<<:\n";
-        A = Theta(A); cout << "Theta\n"; PrintSarrBytes(A);
-        A = Rho(A); cout << "Rho\n"; PrintSarrBytes(A);
-        A = Pi(A); cout << "Pi\n"; PrintSarrBytes(A);
-        A = Chi(A); cout << "Chi\n"; PrintSarrBytes(A);
-        A = Iota(A, RIndex); cout << "Iota\n"; PrintSarrBytes(A);
-    }
+        A=Iota(Chi(Pi(Rho(Theta(A)))),RIndex);
+        }
     return A;
 }
 
+//Nimmt neue Bits des Inputs in das State-Array auf
 Sarray Absorb(vector<bool> M, Sarray A, int Pos){
     for(int n = 0; n < BitRate; n++){
         A[(n/64)%5][(n/320)%5][n%64]=A[(n/64)%5][(n/320)%5][n%64]^M[n+Pos];
@@ -138,20 +134,7 @@ Sarray Absorb(vector<bool> M, Sarray A, int Pos){
     return A;
 }
 
+//Gibt ein Bit aus dem State-Array zurück (für das Herauslesen des Hashes)
 bool Squeeze(Sarray A, int Pos){
     return (A[(Pos/64)%5][(Pos/320)%5][Pos%64]);
-}
-
-void PrintSarrBytes(Sarray A){
-    int ByteVal;
-    for(int y=0;y<5;y++){
-        for(int x=0;x<5;x++){
-            for(int z=0;z<64/8;z++){
-                ByteVal = A[x][y][(z*8)]+2*A[x][y][1+(z*8)]+4*A[x][y][2+(z*8)]+8*A[x][y][3+(z*8)]+16*A[x][y][4+(z*8)]+32*A[x][y][5+(z*8)]+64*A[x][y][6+(z*8)]+128*A[x][y][7+(z*8)];
-                if(ByteVal < 16){cout << "0";}
-                cout << hex << ByteVal << " ";
-            }
-        if((x+y)%2 != 0 || (y == 4 && x == 4)){cout << "\n";}
-        }
-    }
 }

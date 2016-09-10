@@ -1,41 +1,32 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include<string>
+#include <stdlib.h>
 
 #include"RndFun.h"
 
-#include"sha3.h"
-
-
 using namespace std;
-int BitRate = 576;
 
-
+int BitRate;
 int main(int argc, char *argv[]){
-//Test(sha3.h)
-    SHA3 sha3;
-    sha3.reset();
-    char* xPtr;
+//Output-Länge&Bitrate
+    int Hashlength = atoi(argv[1]);
+
+    if(Hashlength != 512 && Hashlength != 384 && Hashlength != 256 && Hashlength != 224){
+        cout << "Verwendung: ./Keccak [Output-Länge] [Datei]\n Output muss entweder 224, 256, 384 oder 512 Bits lang sein" << endl;
+        return 1;
+    }
+
+    BitRate = 1600 - (2 * Hashlength);
 
 //Datei->bit-Vektor
     vector<bool> input (0);
-    ifstream datei (argv[1], fstream::in|fstream::binary);
     char x;
-    string Sinput("");
+    ifstream datei (argv[2], fstream::in|fstream::binary);
     while(datei.get(x)){
-        xPtr = &x;
-        Sinput.push_back(x);
-        sha3.add(xPtr, 1);
-        for(int i=0; i<=7;++i){
-            input.push_back((x >> (i)) & 1);
+         for(int i=0; i<=7;++i){
+            input.push_back((x >> i) & 1);
         }
-    }
-
-//InputOutput
-    cout << "Input:";
-    for(int n = 0; n<input.size(); n++){
-        cout << input[n];
     }
 
 //01-Suffix
@@ -49,11 +40,6 @@ int main(int argc, char *argv[]){
     }
     input.push_back(1);
 
-
-    cout << "\n ZU ABSORBIEREN: \n";
-    for(int c = 0; c < input.size(); c++){cout << input[c];}
-    cout << endl;
-
 //State Array
     Sarray state(5,sheet(5,lane(64)));
         for(int x=0;x<5;x++){
@@ -64,33 +50,22 @@ int main(int argc, char *argv[]){
             }
         }
 
-//Sponge
-for(int NR=0; NR<(input.size()/BitRate); NR++){
-    state=Absorb(input, state, NR*BitRate);
-    cout << "\n ABSORBIERT: \n"; PrintSarrBytes(state);
+//Sponge-Konstruktion
+    for(int NR=0; NR < input.size(); NR += BitRate){
+    state=Absorb(input, state, NR);
     state = RPerm(state);
     }
 
-    vector<bool> Hash(512);
-    for(int l=0; l< 512; l++){
+    vector<bool> Hash(Hashlength);
+    for(int l=0; l< Hashlength; l++){
         Hash[l]=Squeeze(state, l);
     }
 
-//Sinput
-    cout << Sinput << endl;
-
-
-//BitHash-Output
-    cout << "BitHash: " << endl;
-    for(int t=0; t<Hash.size()/64;t++){
-        for(int b = 0; b<64;b++){ cout << Hash[b+t*64] ;}
-        cout << "\n";
-    }
 
 
 //Hash-Output
     int Hexadec;
-    cout << "Hash:    ";
+    cout << "SHA3-" << Hashlength << ": ";
     for(int t=0; t<Hash.size()/8;t++){
         Hexadec = 8*Hash[8*t+7]+4*Hash[8*t+6]+2*Hash[8*t+5]+Hash[8*t+4];
         cout << hex << Hexadec;
@@ -98,14 +73,6 @@ for(int NR=0; NR<(input.size()/BitRate); NR++){
         cout << hex << Hexadec;
     }
     cout << endl;
-
-//Test
-    cout << "TestHash:";
-
-
-    string TestHash = sha3.getHash();
-    cout << TestHash << endl;
-    SHA3 sha32;
 
     return 0;
 }
