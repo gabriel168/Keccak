@@ -1,9 +1,10 @@
 #include"RndFun.h"
 #include<cmath>
+#include<deque>
 
 /*Ersetzt jedes Element mit Koordinaten (a,b,c) durch den XOr-Wert von sich selbst und der
  * XOr-Summe aller Elemente mit den (x,z)-Koordinaten (a - 1,c) oder (a + 1,c - 1) */
- Sarray Theta(Sarray A){
+Sarray Theta(Sarray A){
     vector< vector<bool> > TmpArr1(5, vector<bool>(64));
     for(int x=0;x<5;x++){
         for(int z=0;z<64;z++){
@@ -90,15 +91,16 @@ Sarray Chi(Sarray A){
 //Gibt abhängig von t entweder 0 oder 1 zurück
 bool rc(int t){
     if(t%255 == 0){return 1;}
-    short int R = 1;
+    deque<bool> R(8); R={1,0,0,0,0,0,0,0};
     for(int i = 0; i < t%255; i++){
-        R = R << 1;
-        R = R^((R >> 8) & 1);
-        R = R^((R >> 4) & 16);
-        R = R^((R >> 3) & 32);
-        R = R^((R >> 2) & 64);
+        R.push_front(0);
+        R[0]=R[0]^R[8];
+        R[4]=R[4]^R[8];
+        R[5]=R[5]^R[8];
+        R[6]=R[6]^R[8];
+        R.pop_back();
     }
-    return R&1;
+    return R[0];
 }
 
 /*Modifiziert einige der Elemente der Reihe (0,0,z), deren z-Koordinate eine Zweierpotenz ist.*/

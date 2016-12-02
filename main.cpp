@@ -17,7 +17,7 @@ int main(int argc, char *argv[]){
         return 1;
     }
 
-    BitRate = 1600 - (2 * Hashlength);
+    BitRate = 1600 - (2*Hashlength);
 
 //Datei->bit-Vektor
     vector<bool> input (0);
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
     ifstream datei (argv[2], fstream::in|fstream::binary);
     while(datei.get(x)){
          for(int i=0; i<=7;++i){
-            input.push_back((x >> i) & 1);
+            input.push_back((x >> i) & 1); //Jedes Byte der Inputdatei wird Bitweise dem Vektor hinzugefügt.
         }
     }
 
@@ -51,11 +51,12 @@ int main(int argc, char *argv[]){
         }
 
 //Sponge-Konstruktion
+    //Aufnahmephase
     for(int NR=0; NR < input.size(); NR += BitRate){
-    state=Absorb(input, state, NR);
-    state = RPerm(state);
+        state = Absorb(input, state, NR);
+        state = RPerm(state);
     }
-
+    //Ausgabephase
     vector<bool> Hash(Hashlength);
     for(int l=0; l< Hashlength; l++){
         Hash[l]=Squeeze(state, l);
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]){
 
 
 
-//Hash-Output
+//Hash-Output, mit Umwandlung vom Binär- ins Hexadezimalsystem
     int Hexadec;
     cout << "SHA3-" << Hashlength << ": ";
     for(int t=0; t<Hash.size()/8;t++){
