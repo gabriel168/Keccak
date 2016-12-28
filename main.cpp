@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <stdlib.h>
+#include<iomanip>
 
 #include"RndFun.h"
 
@@ -42,13 +43,6 @@ int main(int argc, char *argv[]){
 
 //State Array
     Sarray state(5,sheet(5,lane(64)));
-        for(int x=0;x<5;x++){
-            for(int y=0;y<5;y++){
-                for(int z=0;z<64;z++){
-                       state[x][y][z] = 0;
-                }
-            }
-        }
 
 //Sponge-Konstruktion
     //Aufnahmephase
@@ -62,16 +56,12 @@ int main(int argc, char *argv[]){
         Hash[l]=Squeeze(state, l);
     }
 
-
-
 //Hash-Output, mit Umwandlung vom Binär- ins Hexadezimalsystem
-    int Hexadec;
+    int output;
     cout << "SHA3-" << Hashlength << ": ";
-    for(int t=0; t<Hash.size()/8;t++){
-        Hexadec = 8*Hash[8*t+7]+4*Hash[8*t+6]+2*Hash[8*t+5]+Hash[8*t+4];
-        cout << hex << Hexadec;
-        Hexadec = 8*Hash[8*t+3]+4*Hash[8*t+2]+2*Hash[8*t+1]+Hash[8*t];
-        cout << hex << Hexadec;
+    for(int t=0; t<Hash.size();t += 8){
+        output = 128*Hash[t+7]+64*Hash[t+6]+32*Hash[t+5]+16*Hash[t+4]+8*Hash[t+3]+4*Hash[t+2]+2*Hash[t+1]+Hash[t];
+        cout << setfill('0') << setw(2) << hex << output;
     }
     cout << endl;
 
