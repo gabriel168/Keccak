@@ -10,15 +10,20 @@ using namespace std;
 
 int BitRate;
 int main(int argc, char *argv[]){
+    if(argc < 2){
+        cout << "Verwendung: ./Keccak [Output-Länge] [Datei]\nDer Output muss entweder 224, 256, 384 oder 512 Bits lang sein" << endl;
+        return 0;
+    }
+    
 //Output-Länge&Bitrate
     int Hashlength = atoi(argv[1]);
+    BitRate = 1600 - (2*Hashlength);
 
     if(Hashlength != 512 && Hashlength != 384 && Hashlength != 256 && Hashlength != 224){
-        cout << "Verwendung: ./Keccak [Output-Länge] [Datei]\n Output muss entweder 224, 256, 384 oder 512 Bits lang sein" << endl;
+        cout << "Verwendung: ./Keccak [Output-Länge] [Datei]\nDer Output muss entweder 224, 256, 384 oder 512 Bits lang sein" << endl;
         return 1;
     }
 
-    BitRate = 1600 - (2*Hashlength);
 
 //Datei->bit-Vektor
     vector<bool> input (0);
