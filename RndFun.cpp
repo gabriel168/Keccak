@@ -81,7 +81,7 @@ Sarray Chi(Sarray A){
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
             for(int z=0;z<64;z++){
-                   B[x][y][z] = A[x][y][z] ^ (!A[(x+1)%5][y][z] & (A[(x+2)%5][y][z]));
+                B[x][y][z] = A[x][y][z] ^ (!A[(x+1)%5][y][z] & (A[(x+2)%5][y][z]));
             }
         }
     }
@@ -114,7 +114,7 @@ Sarray Iota(Sarray A,int index){
 Sarray RPerm(Sarray A){
     for(int RIndex = 0; RIndex < 24; RIndex++){
         A=Iota(Chi(Pi(Rho(Theta(A)))),RIndex);
-        }
+    }
     return A;
 }
 

@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
     char x;
     ifstream datei (argv[2], fstream::in|fstream::binary);
     while(datei.get(x)){
-         for(int i=0; i<=7;++i){
+        for(int i=0; i<=7;++i){
             input.push_back((x >> i) & 1); //Jedes Byte der Inputdatei wird Bitweise dem Vektor hinzugefügt.
         }
     }
@@ -63,7 +63,6 @@ int main(int argc, char *argv[]){
 
 //Hash-Output, mit Umwandlung vom Binär- ins Hexadezimalsystem
     int output;
-    cout << "SHA3-" << Hashlength << ": ";
     for(int t=0; t<Hash.size();t += 8){
         output = 128*Hash[t+7]+64*Hash[t+6]+32*Hash[t+5]+16*Hash[t+4]+8*Hash[t+3]+4*Hash[t+2]+2*Hash[t+1]+Hash[t];
         cout << setfill('0') << setw(2) << hex << output;
