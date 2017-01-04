@@ -1,11 +1,9 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <stdlib.h>
-#include<iomanip>
-
+#include <iomanip>
 #include"RndFun.h"
-
+#include <bitset>
 using namespace std;
 
 int BitRate;
@@ -14,60 +12,59 @@ int main(int argc, char *argv[]){
         cout << "Verwendung: ./Keccak [Output-Länge] [Datei]\nDer Output muss entweder 224, 256, 384 oder 512 Bits lang sein" << endl;
         return 0;
     }
-    
-//Output-Länge&Bitrate
+
+    //Output-Länge&Bitrate
     int Hashlength = atoi(argv[1]);
     BitRate = 1600 - (2*Hashlength);
 
     if(Hashlength != 512 && Hashlength != 384 && Hashlength != 256 && Hashlength != 224){
-        cout << "Verwendung: ./Keccak [Output-Länge] [Datei]\nDer Output muss entweder 224, 256, 384 oder 512 Bits lang sein" << endl;
+        cout << "Verwendung: ./Keccak [Output-Länge] [Datei]\n Output muss entweder 224, 256, 384 oder 512 Bits lang sein" << endl;
         return 1;
     }
 
-
-//Datei->bit-Vektor
-    vector<bool> input (0);
+    //Datei->vector<char>
+    vector<char> input (0);
     char x;
     ifstream datei (argv[2], fstream::in|fstream::binary);
     while(datei.get(x)){
-        for(int i=0; i<=7;++i){
-            input.push_back((x >> i) & 1); //Jedes Byte der Inputdatei wird Bitweise dem Vektor hinzugefügt.
+        input.push_back(x);
+    }
+
+    //01-Suffix & pad10*1
+    int toInsert = (BitRate/8) - (input.size() %(BitRate/8));
+    if(toInsert == 1){
+        input.push_back(0b10000110);
+    }else{
+        input.push_back(0b00000110);
+        for(int t = 0; t < toInsert-2; t++){
+            input.push_back(0b00000000);
         }
+        input.push_back(0b10000000);
     }
 
-//01-Suffix
-    input.push_back(0);
-    input.push_back(1);
+    //State Array
+    vector< vector<uint64_t> > state (5, vector<uint64_t> (5, 0));
 
-//pad10*1-
-    input.push_back(1);
-    while((input.size()+1)%(BitRate)>0){
-        input.push_back(0);
-    }
-    input.push_back(1);
-
-//State Array
-    Sarray state(5,sheet(5,lane(64)));
-
-//Sponge-Konstruktion
-    //Aufnahmephase
-    for(int NR=0; NR < input.size(); NR += BitRate){
+    //Sponge-Konstruktion
+    for(int NR=0; NR < input.size(); NR += BitRate/8){
         state = Absorb(input, state, NR);
         state = RPerm(state);
     }
-    //Ausgabephase
-    vector<bool> Hash(Hashlength);
-    for(int l=0; l< Hashlength; l++){
-        Hash[l]=Squeeze(state, l);
+    vector<uint32_t> Hash; // 224/64 = 3.5 -> daher uint32_t stat uint64_t
+    for(int l=0; l< Hashlength/32; l++){
+        Hash.push_back(Squeeze(state, l));
     }
 
-//Hash-Output, mit Umwandlung vom Binär- ins Hexadezimalsystem
-    int output;
-    for(int t=0; t<Hash.size();t += 8){
-        output = 128*Hash[t+7]+64*Hash[t+6]+32*Hash[t+5]+16*Hash[t+4]+8*Hash[t+3]+4*Hash[t+2]+2*Hash[t+1]+Hash[t];
-        cout << setfill('0') << setw(2) << hex << output;
+    //Hash-Output
+    int Hexadec;
+    for(int t=0; t<Hash.size();t++){
+        for(int b = 0; b < 4; b++){
+            int by = (Hash[t] >> 8*b) & 255;
+            cout << hex << setfill('0') << setw(2) << by;
+        }
     }
     cout << endl;
+
 
     return 0;
 }

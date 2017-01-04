@@ -1,132 +1,180 @@
 #include"RndFun.h"
 #include<cmath>
-#include<deque>
+#include<iostream>
+#include<iomanip>
+#include<bitset>
 
-/*Ersetzt jedes Element mit Koordinaten (a,b,c) durch den XOr-Wert von sich selbst und der
- * XOr-Summe aller Elemente mit den (x,z)-Koordinaten (a - 1,c) oder (a + 1,c - 1) */
+/*'Rotiert' uint64_ts - über den Rand hinausgeschobene
+ *Bits werden am anderen Ende einefügt*/
+uint64_t rot(uint64_t v, int offset){
+    int s =  offset % 64;
+    return (v<<s) | (v>>(64-s));
+}
+
+
 Sarray Theta(Sarray A){
-    vector< vector<bool> > TmpArr1(5, vector<bool>(64));
+    vector<uint64_t> TmpArr1 (5);
     for(int x=0;x<5;x++){
-        for(int z=0;z<64;z++){
-            TmpArr1[x][z] = A[x][0][z]^A[x][1][z]^A[x][2][z]^A[x][3][z]^A[x][4][z];
-        }
+        TmpArr1[x] = A[x][0]^A[x][1]^A[x][2]^A[x][3]^A[x][4];
     }
 
-    vector< vector<bool> > TempArr2(5, vector<bool>(64));
+    vector<uint64_t> TmpArr2 (5,0);
     for(int x=0;x<5;x++){
-        for(int z=0;z<64;z++){
-            TempArr2[x][z] = TmpArr1[(x+4)%5][z]^TmpArr1[(x+1)%5][(z+63)%64];
-        }
+        TmpArr2[x] = (TmpArr1[(x+4)%5])^(rot(TmpArr1[(x+1)%5],1));
     }
 
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
-            for(int z=0;z<64;z++){
-                A[x][y][z]=A[x][y][z]^TempArr2[x][z];
-            }
+            A[x][y] = A[x][y]^TmpArr2[x];
         }
     }
     return A;
 }
-/*Verschiebt alle Elemente in der z-Richtung um einen Wert, der von den (x,y)-Koordinaten abhängt.*/
+
 Sarray Rho(Sarray A){
-    Sarray B(5,sheet(5,lane(64)));
-    for(int z=0;z<64;z++){
-        B[0][0][z] = A[0][0][z];
-        B[1][0][(z+1)%64] = A[1][0][z];
-        B[0][2][(z+3)%64] = A[0][2][z];
-        B[2][1][(z+6)%64] = A[2][1][z];
-        B[1][2][(z+10)%64] = A[1][2][z];
-        B[2][3][(z+15)%64] = A[2][3][z];
-        B[3][3][(z+21)%64] = A[3][3][z];
-        B[3][0][(z+28)%64] = A[3][0][z];
-        B[0][1][(z+36)%64] = A[0][1][z];
-        B[1][3][(z+45)%64] = A[1][3][z];
-        B[3][1][(z+55)%64] = A[3][1][z];
-        B[1][4][(z+66)%64] = A[1][4][z];
-        B[4][4][(z+78)%64] = A[4][4][z];
-        B[4][0][(z+91)%64] = A[4][0][z];
-        B[0][3][(z+105)%64] = A[0][3][z];
-        B[3][4][(z+120)%64] = A[3][4][z];
-        B[4][3][(z+136)%64] = A[4][3][z];
-        B[3][2][(z+153)%64] = A[3][2][z];
-        B[2][2][(z+171)%64] = A[2][2][z];
-        B[2][0][(z+190)%64] = A[2][0][z];
-        B[0][4][(z+210)%64] = A[0][4][z];
-        B[4][2][(z+231)%64] = A[4][2][z];
-        B[2][4][(z+253)%64] = A[2][4][z];
-        B[4][1][(z+276)%64] = A[4][1][z];
-        B[1][1][(z+300)%64] = A[1][1][z];
-    }
+    vector< vector<uint64_t> > B (5, vector<uint64_t> (5, 0));
+    B[0][0] = A[0][0];
+    B[1][0] = rot(A[1][0], 1);
+    B[0][2] = rot(A[0][2], 3);
+    B[2][1] = rot(A[2][1], 6);
+    B[1][2] = rot(A[1][2], 10);
+    B[2][3] = rot(A[2][3], 15);
+    B[3][3] = rot(A[3][3], 21);
+    B[3][0] = rot(A[3][0], 28);
+    B[0][1] = rot(A[0][1], 36);
+    B[1][3] = rot(A[1][3], 45);
+    B[3][1] = rot(A[3][1], 55);
+    B[1][4] = rot(A[1][4], 2);
+    B[4][4] = rot(A[4][4], 14);
+    B[4][0] = rot(A[4][0], 27);
+    B[0][3] = rot(A[0][3], 41);
+    B[3][4] = rot(A[3][4], 56);
+    B[4][3] = rot(A[4][3], 8);
+    B[3][2] = rot(A[3][2], 25);
+    B[2][2] = rot(A[2][2], 43);
+    B[2][0] = rot(A[2][0], 62);
+    B[0][4] = rot(A[0][4], 18);
+    B[4][2] = rot(A[4][2], 39);
+    B[2][4] = rot(A[2][4], 61);
+    B[4][1] = rot(A[4][1], 20);
+    B[1][1] = rot(A[1][1], 44);
     return B;
 }
 
-/*Ersetzt jede z-Reihe (bzw Lane) mit den (x,y)-Koordinaten (a,b)
- * durch die Reihe mit (x,y)-Koordinaten (a + 3b,a)*/
 Sarray Pi(Sarray A){
-    Sarray B(5,sheet(5,lane(64)));
+    vector< vector<uint64_t> > B (5, vector<uint64_t> (5));
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
-            for(int z=0;z<64;z++){
-                B[x][y][z] = A[(x+3*y)%5][x][z];
+            B[x][y] = A[(x+3*y)%5][x];
             }
         }
-    }
     return B;
 }
 
-/*Ersetzt jedes Element durch den XOr-Wert von sich selbst und einer Funktion aus zwei anderen Elementen*/
 Sarray Chi(Sarray A){
-    Sarray B(5,sheet(5,lane(64)));
+    vector< vector<uint64_t> > B (5, vector<uint64_t> (5));
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
-            for(int z=0;z<64;z++){
-                B[x][y][z] = A[x][y][z] ^ (!A[(x+1)%5][y][z] & (A[(x+2)%5][y][z]));
-            }
+            B[x][y] = A[x][y] ^ ((0xFFFFFFFFFFFFFFFF^A[(x+1)%5][y]) & (A[(x+2)%5][y]));
         }
     }
     return B;
 }
 
-bool rc(int t){
-    vector<bool> v = {1,0,0,0,0,0,0,0,1,0,1,1,0,0,0,1,1,1,1,0,1,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,0,0,0,0,1,0,
-                      1,0,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,0,0,0,0,0,1,1,0,0,0,1,0,1,0,1,1,0,0,1,1,0,0,1,0,
-                      1,1,1,1,1,1,0,1,1,1,1,0,0,1,1,0,1,1,1,0,1,1,1,0,0,1,0,1,0,1,0,0,1,0,1,0,0,0,1,0,0,1,
-                      0,1,1,0,1,0,0,0,1,1,0,0,1,1,1,0,0,1,1,1,1,0,0,0,1,1,0,1,1,0,0,0,0,1,0,0,0,1,0,1,1,1};
-    return v[t];
-}
-
-/*Modifiziert einige der Elemente der Reihe (0,0,z), deren z-Koordinate eine Zweierpotenz ist.*/
 Sarray Iota(Sarray A,int index){
-    vector<bool> RC (64);
-    for(int a = 0; a < 64; a++){
-        RC[a]=0;
-    }
-    for(int j=0; j<=6; j++){
-        RC[pow(2,j)-1]=rc(j+(7*index));
-    }
-    for(int z=0; z<64 ;z++){
-        A[0][0][z]=A[0][0][z]^RC[z];}
+    vector<uint64_t> v = {
+        0b0000000000000000000000000000000000000000000000000000000000000001,
+        0b0000000000000000000000000000000000000000000000001000000010000010,
+        0b1000000000000000000000000000000000000000000000001000000010001010,
+        0b1000000000000000000000000000000010000000000000001000000000000000,
+        0b0000000000000000000000000000000000000000000000001000000010001011,
+        0b0000000000000000000000000000000010000000000000000000000000000001,
+        0b1000000000000000000000000000000010000000000000001000000010000001,
+        0b1000000000000000000000000000000000000000000000001000000000001001,
+        0b0000000000000000000000000000000000000000000000000000000010001010,
+        0b0000000000000000000000000000000000000000000000000000000010001000,
+        0b0000000000000000000000000000000010000000000000001000000000001001,
+        0b0000000000000000000000000000000010000000000000000000000000001010,
+        0b0000000000000000000000000000000010000000000000001000000010001011,
+        0b1000000000000000000000000000000000000000000000000000000010001011,
+        0b1000000000000000000000000000000000000000000000001000000010001001,
+        0b1000000000000000000000000000000000000000000000001000000000000011,
+        0b1000000000000000000000000000000000000000000000001000000000000010,
+        0b1000000000000000000000000000000000000000000000000000000010000000,
+        0b0000000000000000000000000000000000000000000000001000000000001010,
+        0b1000000000000000000000000000000010000000000000000000000000001010,
+        0b1000000000000000000000000000000010000000000000001000000010000001,
+        0b1000000000000000000000000000000000000000000000001000000010000000,
+        0b0000000000000000000000000000000010000000000000000000000000000001,
+        0b1000000000000000000000000000000010000000000000001000000000001000,
+    };
+    A[0][0] = A[0][0]^(v[index]);
     return A;
 }
 
-//Alle Permutationsfunktionen einer Runde zusammen
 Sarray RPerm(Sarray A){
     for(int RIndex = 0; RIndex < 24; RIndex++){
-        A=Iota(Chi(Pi(Rho(Theta(A)))),RIndex);
-    }
+        /*cout << "#---ROUND #" << dec << RIndex << "---#" << endl;
+        A= Theta(A);
+        cout << "#--Theta--#" << endl;
+        PrintSarrBytes(A);
+
+        A = Rho(A);
+        cout << "#--Rho--#" << endl;
+        PrintSarrBytes(A);
+
+        A = Pi(A);
+        cout << "#--Pi--#" << endl;
+        PrintSarrBytes(A);
+
+        A = Chi(A);
+        cout << "#--Chi--#" << endl;
+        PrintSarrBytes(A);
+
+        A = Iota(A, RIndex);
+        cout << "#--Iota--#" << endl;
+        PrintSarrBytes(A);*/
+        A = Iota(Chi(Pi(Rho(Theta(A)))),RIndex);
+        }
     return A;
 }
 
-//Nimmt neue Bits des Inputs in das State-Array auf
-Sarray Absorb(vector<bool> M, Sarray A, int Pos){
-    for(int n = 0; n < BitRate; n++){
-        A[(n/64)%5][(n/320)%5][n%64]=A[(n/64)%5][(n/320)%5][n%64]^M[n+Pos];
+
+Sarray Absorb(vector<char> M, Sarray A, int Pos){
+    for(int n = 0; n < BitRate/64; n++){
+        int x = Pos+(8*n);
+        for(int i = 0; i < 8; i++){
+            uint64_t in = M[x+i] & 255;
+            in <<= (8*i);
+            A[n%5][(n/5)%5] ^= in;
+        }
     }
+    /*cout << "#--Absorbed--#" << endl;
+    PrintSarrBytes(A);
+    PrintSarrBits(A);*/
     return A;
 }
 
-//Gibt ein Bit aus dem State-Array zurück (für das Herauslesen des Hashes)
-bool Squeeze(Sarray A, int Pos){
-    return (A[(Pos/64)%5][(Pos/320)%5][Pos%64]);
+uint32_t Squeeze(Sarray A, int Pos){
+    uint64_t v = A[(Pos/2) % 5][(Pos/2)/5];
+    return ((Pos % 2)==0) ? (v & 0xFFFFFFFF) : ((v >> 32) & 0xFFFFFFFF);
+}
+
+
+void PrintSarrBytes(Sarray A){
+    bool b = true;
+    for(int y = 0; y < 5; y++){
+        for(int x = 0; x < 5; x++){
+            for(int i = 0; i < 8; i ++){
+                uint64_t a = A[x][y] >> (8*i);
+                int x = a&255;
+                cout <<  setw(2) << setfill('0') << hex << x;
+            }
+            if(b){cout << ' ';}
+            else{ cout << endl;}
+            b = !b;
+        }
+
+    }
+    cout << endl;
 }
