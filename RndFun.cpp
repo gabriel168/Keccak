@@ -66,8 +66,8 @@ Sarray Pi(Sarray A){
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
             B[x][y] = A[(x+3*y)%5][x];
-            }
         }
+    }
     return B;
 }
 
@@ -114,28 +114,8 @@ Sarray Iota(Sarray A,int index){
 
 Sarray RPerm(Sarray A){
     for(int RIndex = 0; RIndex < 24; RIndex++){
-        /*cout << "#---ROUND #" << dec << RIndex << "---#" << endl;
-        A= Theta(A);
-        cout << "#--Theta--#" << endl;
-        PrintSarrBytes(A);
-
-        A = Rho(A);
-        cout << "#--Rho--#" << endl;
-        PrintSarrBytes(A);
-
-        A = Pi(A);
-        cout << "#--Pi--#" << endl;
-        PrintSarrBytes(A);
-
-        A = Chi(A);
-        cout << "#--Chi--#" << endl;
-        PrintSarrBytes(A);
-
-        A = Iota(A, RIndex);
-        cout << "#--Iota--#" << endl;
-        PrintSarrBytes(A);*/
         A = Iota(Chi(Pi(Rho(Theta(A)))),RIndex);
-        }
+    }
     return A;
 }
 
@@ -149,9 +129,6 @@ Sarray Absorb(vector<char> M, Sarray A, int Pos){
             A[n%5][(n/5)%5] ^= in;
         }
     }
-    /*cout << "#--Absorbed--#" << endl;
-    PrintSarrBytes(A);
-    PrintSarrBits(A);*/
     return A;
 }
 
