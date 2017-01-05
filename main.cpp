@@ -18,8 +18,8 @@ int main(int argc, char *argv[]){
     BitRate = 1600 - (2*Hashlength);
 
     if(Hashlength != 512 && Hashlength != 384 && Hashlength != 256 && Hashlength != 224){
-        cout << "Verwendung: ./Keccak [Output-Länge] [Datei]\n Output muss entweder 224, 256, 384 oder 512 Bits lang sein" << endl;
-        return 1;
+        cout << "Verwendung: ./Keccak [Output-Länge] [Datei]\nDer Output muss entweder 224, 256, 384 oder 512 Bits lang sein" << endl;
+        return 0;
     }
 
     //Datei->vector<char>
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
         state = Absorb(input, state, NR);
         state = RPerm(state);
     }
-    vector<uint32_t> Hash; // 224/64 = 3.5 -> daher uint32_t stat uint64_t
+    vector<uint32_t> Hash; // 224/64 = 3.5 -> daher uint32_t statt uint64_t
     for(int l=0; l< Hashlength/32; l++){
         Hash.push_back(Squeeze(state, l));
     }
