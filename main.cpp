@@ -22,34 +22,28 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    //Datei->vector<char>
-    vector<char> input (0);
-    char x;
+    vector< vector<uint64_t> > state (5, vector<uint64_t> (5, 0)); //State Array
+
     ifstream datei (argv[2], fstream::in|fstream::binary);
-    while(datei.get(x)){
-        input.push_back(x);
-    }
-
-    //01-Suffix & pad10*1
-    int toInsert = (BitRate/8) - (input.size() %(BitRate/8));
-    if(toInsert == 1){
-        input.push_back(0b10000110);
-    }else{
-        input.push_back(0b00000110);
-        for(int t = 0; t < toInsert-2; t++){
-            input.push_back(0b00000000);
-        }
-        input.push_back(0b10000000);
-    }
-
-    //State Array
-    vector< vector<uint64_t> > state (5, vector<uint64_t> (5, 0));
+    char x;
+    vector<char> InputBuffer (BitRate/8);
 
     //Sponge-Konstruktion
-    for(int NR=0; NR < input.size(); NR += BitRate/8){
-        state = Absorb(input, state, NR);
+    bool DateiZuEnde = false;
+    while(!DateiZuEnde){
+        for(int i = 0; i < BitRate/8 && !DateiZuEnde; i++){
+            if(datei.get(x)){
+                InputBuffer[i] = x;
+            }else{
+                DateiZuEnde = true;
+                pad(InputBuffer, i);
+            }
+        }
+        state = Absorb(InputBuffer, state);
         state = RPerm(state);
     }
+    datei.close();
+
     vector<uint32_t> Hash; // 224/64 = 3.5 -> daher uint32_t statt uint64_t
     for(int l=0; l< Hashlength/32; l++){
         Hash.push_back(Squeeze(state, l));
@@ -64,7 +58,6 @@ int main(int argc, char *argv[]){
         }
     }
     cout << endl;
-
 
     return 0;
 }

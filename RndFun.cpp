@@ -11,7 +11,6 @@ uint64_t rot(uint64_t v, int offset){
     return (v<<s) | (v>>(64-s));
 }
 
-
 Sarray Theta(Sarray A){
     vector<uint64_t> TmpArr1 (5);
     for(int x=0;x<5;x++){
@@ -119,12 +118,24 @@ Sarray RPerm(Sarray A){
     return A;
 }
 
+void pad(vector<char>& input, int index){
+    int toInsert = (BitRate/8)-index;
+    if(toInsert == 1){
+        input[index] = (0b10000110);
+    }else{
+        input[index] = (0b00000110);
+        for(int t = 1; t < toInsert-1; t++){
+            input[index+t] = (0b00000000);
+        }
+        input[index+toInsert-1] = (0b10000000);
+    }
+}
 
-Sarray Absorb(vector<char> M, Sarray A, int Pos){
+Sarray Absorb(vector<char> InputBuffer, Sarray A){
     for(int n = 0; n < BitRate/64; n++){
-        int x = Pos+(8*n);
+        int x = (8*n);
         for(int i = 0; i < 8; i++){
-            uint64_t in = M[x+i] & 255;
+            uint64_t in = InputBuffer[x+i] & 255;
             in <<= (8*i);
             A[n%5][(n/5)%5] ^= in;
         }
