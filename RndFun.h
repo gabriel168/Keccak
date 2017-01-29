@@ -16,8 +16,8 @@ void Iota(Sarray &A,int index);
 void RPerm(Sarray &A, Sarray &B, vector<uint64_t> &C, vector<uint64_t> &D);
 
 uint64_t rot(uint16_t v, int shift);
-void pad(vector<char>& input, int index);
-void Absorb(vector<char> M, Sarray &A);
+void pad(Sarray &state, int StartIndex);
+void Absorb(char Input, Sarray &A, int pos);
 uint32_t Squeeze(Sarray A, int Pos);
 
 void PrintSarrBytes(Sarray A);

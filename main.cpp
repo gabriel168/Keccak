@@ -22,29 +22,28 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
+    ifstream InputDatei (argv[2], fstream::in|fstream::binary);
+    char InputByte;
+
+    //Arrays für die Permutationsfunktion
     vector< vector<uint64_t> > state_main (5, vector<uint64_t> (5, 0)); //State Array
     vector< vector<uint64_t> > state_alt (5, vector<uint64_t> (5, 0)); //Für Zwischenresultate in RPerm
     vector<uint64_t> TmpArr1 (5), TmpArr2 (5); //Für Zwischenresultate in Theta
 
-    ifstream datei (argv[2], fstream::in|fstream::binary);
-    vector<char> InputBuffer (BitRate/8);
-    char InputByte;
-
-    //Sponge-Konstruktion
+    //Sponge-Konstruktion: Aufnahme & Verarbeitung der Daten
     bool DateiZuEnde = false;
     while(!DateiZuEnde){
         for(int i = 0; i < BitRate/8 && !DateiZuEnde; i++){
-            if(datei.get(InputByte)){
-                InputBuffer[i] = InputByte;
+            if(InputDatei.get(InputByte)){
+                Absorb(InputByte, state_main, i); //Nimmt das nächste Byte der Datei in das Zustandsarray auf
             }else{
                 DateiZuEnde = true;
-                pad(InputBuffer, i);
+                pad(state_main, i);
             }
         }
-        Absorb(InputBuffer, state_main);
         RPerm(state_main, state_alt, TmpArr1, TmpArr2);
     }
-    datei.close();
+    InputDatei.close();
 
     //Hash-Output
     for(int t=0; t < Hashlength/32; t++){

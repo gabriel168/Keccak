@@ -112,35 +112,29 @@ void RPerm(Sarray &A, Sarray& B, vector<uint64_t> &C, vector<uint64_t> &D){
 }
 
 
-void pad(vector<char>& input, int index){
-    int toInsert = (BitRate/8)-index;
+void pad(Sarray &state, int StartIndex){
+    int toInsert = (BitRate/8)-StartIndex;
     if(toInsert == 1){
-        input[index] = (0b10000110);
+        Absorb(0b10000110, state, StartIndex);
     }else{
-        input[index] = (0b00000110);
+        Absorb(0b00000110, state, StartIndex);
         for(int t = 1; t < toInsert-1; t++){
-            input[index+t] = (0b00000000);
+            Absorb(0b00000000, state, StartIndex+t);
         }
-        input[index+toInsert-1] = (0b10000000);
+        Absorb(0b10000000, state, StartIndex+toInsert-1);
     }
 }
 
-void Absorb(vector<char> InputBuffer, Sarray &A){
-    for(int n = 0; n < BitRate/64; n++){
-        int x = (8*n);
-        for(int i = 0; i < 8; i++){
-            uint64_t in = InputBuffer[x+i] & 255;
-            in <<= (8*i);
-            A[n%5][(n/5)%5] ^= in;
-        }
-    }
+void Absorb(char Input, Sarray &A, int pos){
+    uint64_t in = (Input & 255);
+    in <<= (8*(pos%8));
+    A[(pos/8)%5][(pos/40)%5] ^= in;
 }
 
 uint32_t Squeeze(Sarray A, int Pos){
     uint64_t v = A[(Pos/2) % 5][(Pos/2)/5];
     return ((Pos % 2)==0) ? (v & 0xFFFFFFFF) : ((v >> 32) & 0xFFFFFFFF);
 }
-
 
 void PrintSarrBytes(Sarray A){
     bool b = true;
