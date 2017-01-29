@@ -7,31 +7,27 @@
 /*'Rotiert' uint64_ts - über den Rand hinausgeschobene
  *Bits werden am anderen Ende einefügt*/
 uint64_t rot(uint64_t v, int offset){
-    int s =  offset % 64;
+    int s = offset % 64;
     return (v<<s) | (v>>(64-s));
 }
 
-Sarray Theta(Sarray A){
-    vector<uint64_t> TmpArr1 (5);
+void Theta(Sarray &A, Sarray &B, vector<uint64_t> &C, vector<uint64_t> &D){
     for(int x=0;x<5;x++){
-        TmpArr1[x] = A[x][0]^A[x][1]^A[x][2]^A[x][3]^A[x][4];
+        C[x] = A[x][0]^A[x][1]^A[x][2]^A[x][3]^A[x][4];
     }
 
-    vector<uint64_t> TmpArr2 (5,0);
     for(int x=0;x<5;x++){
-        TmpArr2[x] = (TmpArr1[(x+4)%5])^(rot(TmpArr1[(x+1)%5],1));
+        D[x] = (C[(x+4)%5])^(rot(C[(x+1)%5],1));
     }
 
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
-            A[x][y] = A[x][y]^TmpArr2[x];
+            B[x][y] = A[x][y] ^ D[x];
         }
     }
-    return A;
 }
 
-Sarray Rho(Sarray A){
-    vector< vector<uint64_t> > B (5, vector<uint64_t> (5, 0));
+void Rho(Sarray &A, Sarray &B){
     B[0][0] = A[0][0];
     B[1][0] = rot(A[1][0], 1);
     B[0][2] = rot(A[0][2], 3);
@@ -57,30 +53,25 @@ Sarray Rho(Sarray A){
     B[2][4] = rot(A[2][4], 61);
     B[4][1] = rot(A[4][1], 20);
     B[1][1] = rot(A[1][1], 44);
-    return B;
 }
 
-Sarray Pi(Sarray A){
-    vector< vector<uint64_t> > B (5, vector<uint64_t> (5));
+void Pi(Sarray &A, Sarray &B){
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
             B[x][y] = A[(x+3*y)%5][x];
         }
     }
-    return B;
 }
 
-Sarray Chi(Sarray A){
-    vector< vector<uint64_t> > B (5, vector<uint64_t> (5));
+void Chi(Sarray &A, Sarray &B){
     for(int x=0;x<5;x++){
         for(int y=0;y<5;y++){
             B[x][y] = A[x][y] ^ ((0xFFFFFFFFFFFFFFFF^A[(x+1)%5][y]) & (A[(x+2)%5][y]));
         }
     }
-    return B;
 }
 
-Sarray Iota(Sarray A,int index){
+void Iota(Sarray &A,int index){
     vector<uint64_t> v = {
         0b0000000000000000000000000000000000000000000000000000000000000001,
         0b0000000000000000000000000000000000000000000000001000000010000010,
@@ -108,15 +99,18 @@ Sarray Iota(Sarray A,int index){
         0b1000000000000000000000000000000010000000000000001000000000001000,
     };
     A[0][0] = A[0][0]^(v[index]);
-    return A;
 }
 
-Sarray RPerm(Sarray A){
+void RPerm(Sarray &A, Sarray& B, vector<uint64_t> &C, vector<uint64_t> &D){
     for(int RIndex = 0; RIndex < 24; RIndex++){
-        A = Iota(Chi(Pi(Rho(Theta(A)))),RIndex);
+        Theta(A, B, C, D);
+        Rho(B, A);
+        Pi(A, B);
+        Chi(B, A);
+        Iota(A, RIndex);
     }
-    return A;
 }
+
 
 void pad(vector<char>& input, int index){
     int toInsert = (BitRate/8)-index;
@@ -131,7 +125,7 @@ void pad(vector<char>& input, int index){
     }
 }
 
-Sarray Absorb(vector<char> InputBuffer, Sarray A){
+void Absorb(vector<char> InputBuffer, Sarray &A){
     for(int n = 0; n < BitRate/64; n++){
         int x = (8*n);
         for(int i = 0; i < 8; i++){
@@ -140,7 +134,6 @@ Sarray Absorb(vector<char> InputBuffer, Sarray A){
             A[n%5][(n/5)%5] ^= in;
         }
     }
-    return A;
 }
 
 uint32_t Squeeze(Sarray A, int Pos){

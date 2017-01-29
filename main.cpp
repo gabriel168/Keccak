@@ -2,7 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <iomanip>
-#include"RndFun.h"
+#include "RndFun.h"
 #include <bitset>
 using namespace std;
 
@@ -22,38 +22,35 @@ int main(int argc, char *argv[]){
         return 0;
     }
 
-    vector< vector<uint64_t> > state (5, vector<uint64_t> (5, 0)); //State Array
+    vector< vector<uint64_t> > state_main (5, vector<uint64_t> (5, 0)); //State Array
+    vector< vector<uint64_t> > state_alt (5, vector<uint64_t> (5, 0)); //Für Zwischenresultate in RPerm
+    vector<uint64_t> TmpArr1 (5), TmpArr2 (5); //Für Zwischenresultate in Theta
 
     ifstream datei (argv[2], fstream::in|fstream::binary);
-    char x;
     vector<char> InputBuffer (BitRate/8);
+    char InputByte;
 
     //Sponge-Konstruktion
     bool DateiZuEnde = false;
     while(!DateiZuEnde){
         for(int i = 0; i < BitRate/8 && !DateiZuEnde; i++){
-            if(datei.get(x)){
-                InputBuffer[i] = x;
+            if(datei.get(InputByte)){
+                InputBuffer[i] = InputByte;
             }else{
                 DateiZuEnde = true;
                 pad(InputBuffer, i);
             }
         }
-        state = Absorb(InputBuffer, state);
-        state = RPerm(state);
+        Absorb(InputBuffer, state_main);
+        RPerm(state_main, state_alt, TmpArr1, TmpArr2);
     }
     datei.close();
 
-    vector<uint32_t> Hash; // 224/64 = 3.5 -> daher uint32_t statt uint64_t
-    for(int l=0; l< Hashlength/32; l++){
-        Hash.push_back(Squeeze(state, l));
-    }
-
     //Hash-Output
-    int Hexadec;
-    for(int t=0; t<Hash.size();t++){
+    for(int t=0; t < Hashlength/32; t++){
+        uint32_t Hash = Squeeze(state_main, t); //224/64 = 3.5 -> uint32_t statt uint64_t
         for(int b = 0; b < 4; b++){
-            int by = (Hash[t] >> 8*b) & 255;
+            int by = (Hash >> 8*b) & 255;
             cout << hex << setfill('0') << setw(2) << by;
         }
     }

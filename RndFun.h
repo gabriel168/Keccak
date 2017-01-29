@@ -8,16 +8,16 @@ using namespace std;
 extern int BitRate;
 typedef vector< vector<uint64_t> > Sarray;
 
-Sarray Theta(Sarray A);
-Sarray Rho(Sarray A);
-Sarray Pi(Sarray A);
-Sarray Chi(Sarray A);
-Sarray Iota(Sarray A, int index);
-Sarray RPerm(Sarray A);
+void Theta(Sarray &A, Sarray &B, vector<uint64_t> &C, vector<uint64_t> &D);
+void Rho(Sarray &A, Sarray &B);
+void Pi(Sarray &A, Sarray &B);
+void Chi(Sarray &A, Sarray &B);
+void Iota(Sarray &A,int index);
+void RPerm(Sarray &A, Sarray &B, vector<uint64_t> &C, vector<uint64_t> &D);
 
 uint64_t rot(uint16_t v, int shift);
 void pad(vector<char>& input, int index);
-Sarray Absorb(vector<char> M, Sarray A);
+void Absorb(vector<char> M, Sarray &A);
 uint32_t Squeeze(Sarray A, int Pos);
 
 void PrintSarrBytes(Sarray A);
